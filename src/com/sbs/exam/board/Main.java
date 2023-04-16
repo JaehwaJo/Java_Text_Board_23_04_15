@@ -15,8 +15,6 @@ public class Main {
       String cmd = sc.nextLine();
 
       if(cmd.equals("/usr/article/write")) {
-        Article article = new Article();
-
         System.out.println("게시물 등록");
         System.out.printf("제목 : ");
         String title = sc.nextLine();
@@ -26,10 +24,9 @@ public class Main {
         int id = articleLastId;
         articleLastId++;
 
-        article.id = id;
-        article.title = title;
-        article.body = body;
+        Article article = new Article(id, title, body);
 
+        System.out.println("생성 된 게시물 객체 : " + article);
         System.out.println(id + "번 게시물이 등록되었습니다.");
       }
       else if(cmd.equals("exit")) {
@@ -47,4 +44,19 @@ class Article {
   int id;
   String title;
   String body;
+
+  public Article(int id, String title, String body) {
+    this.id = id;
+    this.title = title;
+    this.body = body;
+  }
+
+  @Override
+  public String toString() {
+    return "{" +
+        "id=" + id +
+        ", title='" + title + '\'' +
+        ", body='" + body + '\'' +
+        '}';
+  }
 }
