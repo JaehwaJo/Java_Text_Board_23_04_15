@@ -1,7 +1,5 @@
 package com.sbs.exam.board;
 
-import javax.swing.plaf.IconUIResource;
-import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -13,7 +11,7 @@ public class Main {
     System.out.println("== 게시판 v 0.1 ==");
     System.out.println("== 프로그램 시작 ==");
     List<Article> articles = new ArrayList<>();
-    TestArticle(articles);
+    testArticles(articles);
 
     while (true) {
       System.out.printf("명령) ");
@@ -28,13 +26,17 @@ public class Main {
 
         int id = articles.size() + 1;
 
-        articles.add(new Article(id, title, body));
-        Article article = articles.get(id - 1);
+        Article article = new Article(id, title, body);
+        articles.add(article);
 
         System.out.println("생성 된 게시물 객체 : " + article);
         System.out.println(id + "번 게시물이 등록되었습니다.");
       }
       else if (cmd.equals("/usr/article/detail")) {
+        if(articles.isEmpty()) {
+          System.out.println("게시물이 존재하지 않습니다.");
+          continue;
+        }
         int id = articles.size() - 1;
         Article article = articles.get(id);
 
@@ -60,13 +62,13 @@ public class Main {
       else {
         System.out.println(cmd + "는 올바른 명령어가 아닙니다.");
       }
+      System.out.println("입력 받은 명령어 : " + cmd);
     }
-    // System.out.println("입력 받은 명령어 : " + cmd);
 
     sc.close();
   }
 
-  static void TestArticle(List<Article> articles) {
+  static void testArticles(List<Article> articles) {
     articles.add(new Article(1, "제목1", "내용1"));
     articles.add(new Article(2, "제목2", "내용2"));
     articles.add(new Article(3, "제목3", "내용3"));
