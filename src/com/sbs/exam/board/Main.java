@@ -5,9 +5,10 @@ import java.util.*;
 public class Main {
 
   static void makeTestData(List<Article> articles) {
-    articles.add(new Article(1, "제목1", "내용1"));
-    articles.add(new Article(2, "제목2", "내용2"));
-    articles.add(new Article(3, "제목3", "내용3"));
+    for(int i = 0; i < 100; i++) {
+      int id = i + 1;
+      articles.add(new Article(id, "제목" + id, "내용" + id));
+    }
   }
   public static void main(String[] args) {
     Scanner sc = new Scanner(System.in);
@@ -39,21 +40,37 @@ public class Main {
         System.out.println("번호 / 제목");
         System.out.println("--------------------");
 
-        boolean orderByDesc = true;
-        if (params.containsKey("orderBy") && params.get("orderBy").equals("idAsc")) {
-          orderByDesc = false;
+        // 검색시작
+        List<Article> filteredArticles = articles;
+
+        if(params.containsKey("searchKeyword")) {
+          String searchKeyword = params.get("searchKeyword");
+
+          filteredArticles = new ArrayList<>();
+
+          for(Article article : articles) {
+            boolean matched = article.title.contains(searchKeyword) || article.body.contains(searchKeyword);
+
+            if(matched) {
+              filteredArticles.add(article);
+            }
+          }
+        }
+        // 검색 끝
+
+        List<Article> sortedArticles = filteredArticles;
+
+        boolean orderByIdDesc = true;
+        if(params.containsKey("orderBy") && params.get("orderBy").equals("idAsc")) {
+          orderByIdDesc = false;
         }
 
-        if (orderByDesc) {
-          for(int i = articles.size() - 1; i >= 0 ; i--) {
-            Article article = articles.get(i);
-            System.out.printf("%d / %s\n", article.id, article.title);
-          }
+        if(orderByIdDesc) {
+          sortedArticles = Util.reverseList(sortedArticles);
         }
-        else {
-          for (Article article : articles) {
-            System.out.printf("%d / %s\n", article.id, article.title);
-          }
+
+        for(Article article : sortedArticles) {
+          System.out.printf("%d / %s\n", article.id, article.title);
         }
       }
       else if (rq.getUrlPath().equals("/usr/article/write")) {
@@ -173,5 +190,15 @@ class Util {
 
   public static String getUrlPathFromUrl(String url) {
     return url.split("\\?", 2)[0];
+  }
+
+  // 이 함수는 원본리스트를 훼손하지 않고, 새 리스트를 만듭니다. 즉 정렬이 반대인 복사본리스트를 만들어서 반환합니다.
+  public static<T> List<T> reverseList(List<T> list) {
+    List<T> reverse = new ArrayList<>(list.size());
+
+    for ( int i = list.size() - 1; i >= 0; i-- ) {
+      reverse.add(list.get(i));
+    }
+    return reverse;
   }
 }
