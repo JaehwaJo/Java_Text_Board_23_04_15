@@ -1,77 +1,113 @@
 package com.sbs.exam.board;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Main {
+
+  static void makeTestData(List<Article> articles) {
+    articles.add(new Article(1, "제목1", "내용1"));
+    articles.add(new Article(2, "제목2", "내용2"));
+    articles.add(new Article(3, "제목3", "내용3"));
+  }
   public static void main(String[] args) {
     Scanner sc = new Scanner(System.in);
+    int articleLastId = 0;
+    List<Article> articles = new ArrayList<>();
+
+    makeTestData(articles);
+
+    if(articles.size() > 0) {
+      articleLastId = articles.get(articles.size() - 1).id;
+    }
 
     System.out.println("== 게시판 v 0.1 ==");
     System.out.println("== 프로그램 시작 ==");
-    List<Article> articles = new ArrayList<>();
-    testArticles(articles);
 
     while (true) {
       System.out.printf("명령) ");
       String cmd = sc.nextLine();
 
-      if(cmd.equals("/usr/article/write")) {
-        System.out.println("게시물 등록");
+      Rq rq = new Rq(cmd);
+      Map<String, String> params = rq.getParams();
+
+      if (rq.getUrlPath().equals("exit")) {
+        break;
+      }
+      else if (rq.getUrlPath().equals("/usr/article/list")) {
+        System.out.println("== 게시물 리스트 ==");
+        System.out.println("--------------------");
+        System.out.println("번호 / 제목");
+        System.out.println("--------------------");
+
+        boolean orderByDesc = true;
+        if (params.containsKey("orderBy") && params.get("orderBy").equals("idAsc")) {
+          orderByDesc = false;
+        }
+
+        if (orderByDesc) {
+          for(int i = articles.size() - 1; i >= 0 ; i--) {
+            Article article = articles.get(i);
+            System.out.printf("%d / %s\n", article.id, article.title);
+          }
+        }
+        else {
+          for (Article article : articles) {
+            System.out.printf("%d / %s\n", article.id, article.title);
+          }
+        }
+      }
+      else if (rq.getUrlPath().equals("/usr/article/write")) {
+        System.out.println("== 게시물 등록 ==");
         System.out.printf("제목 : ");
         String title = sc.nextLine();
         System.out.printf("내용 : ");
         String body = sc.nextLine();
-
-        int id = articles.size() + 1;
+        int id = articleLastId + 1;
+        articleLastId++;
 
         Article article = new Article(id, title, body);
         articles.add(article);
 
-        System.out.println("생성 된 게시물 객체 : " + article);
-        System.out.println(id + "번 게시물이 등록되었습니다.");
+        System.out.printf("%d번 게시물이 등록되었습니다.\n", id);
       }
-      else if (cmd.equals("/usr/article/detail")) {
-        if(articles.isEmpty()) {
+      else if(rq.getUrlPath().equals("/usr/article/detail")) {
+        if(params.containsKey("id") == false) {
+          System.out.println("id를 입력해주세요.");
+          continue;
+        }
+
+        int id = 0;
+
+        try {
+          id = Integer.parseInt(params.get("id"));
+        }
+        catch (NumberFormatException e) {
+          System.out.println("id를 정수 형태로 입력해주세요.");
+          continue;
+        }
+
+        if(id > articles.size()) {
           System.out.println("게시물이 존재하지 않습니다.");
           continue;
         }
-        int id = articles.size() - 1;
-        Article article = articles.get(id);
 
-        System.out.println("== 게시물 상세 보기 ==");
-        System.out.println("번호 : " + article.id);
-        System.out.println("제목 : " + article.title);
-        System.out.println("내용 : " + article.body);
-      }
-      else if (cmd.equals("/usr/article/list")) {
-        System.out.println("== 게시물 리스트 ==");
-        System.out.println("--------------");
-        System.out.println("번호  /  제목");
-        System.out.println("--------------");
-        for (int i = articles.size() - 1; i >= 0; i--) {
-          Article article = articles.get(i);
-          System.out.printf("%d  /  %s\n", article.id, article.title);
-        }
-      }
-      else if(cmd.equals("exit")) {
-        System.out.println("== 프로그램 종료 ==");
-        break;
+        Article article = articles.get(id - 1);
+
+        System.out.println("== 게시물 상세보기 ==");
+        System.out.printf("번호 : %d\n", article.id);
+        System.out.printf("제목 : %s\n", article.title);
+        System.out.printf("내용 : %s\n", article.body);
       }
       else {
-        System.out.println(cmd + "는 올바른 명령어가 아닙니다.");
+        System.out.printf("입력된 명령어 : %s\n", cmd);
       }
-      System.out.println("입력 받은 명령어 : " + cmd);
+
+
     }
 
-    sc.close();
-  }
+    System.out.println("== 프로그램 종료 ==");
 
-  static void testArticles(List<Article> articles) {
-    articles.add(new Article(1, "제목1", "내용1"));
-    articles.add(new Article(2, "제목2", "내용2"));
-    articles.add(new Article(3, "제목3", "내용3"));
+    sc.close();
   }
 }
 
@@ -79,9 +115,8 @@ class Article {
   int id;
   String title;
   String body;
-  public Article () {}
 
-  public Article(int id, String title, String body) {
+  Article(int id, String title, String body) {
     this.id = id;
     this.title = title;
     this.body = body;
@@ -89,10 +124,54 @@ class Article {
 
   @Override
   public String toString() {
-    return "{" +
-        "id=" + id +
-        ", title='" + title + '\'' +
-        ", body='" + body + '\'' +
-        '}';
+    return String.format("{id : %d, title : \"%s\", body : \"%s\"}", id, title, body);
+  }
+}
+
+
+class Rq {
+  private String url;
+  private Map<String, String> params;
+  private String urlPath;
+
+  Rq(String url) {
+    this.url = url;
+    params = Util.getParamsForUrl(this.url);
+    urlPath = Util.getUrlPathFromUrl(this.url);
+  }
+
+  public Map<String, String> getParams() {
+    return params;
+  }
+
+  public String getUrlPath() {
+    return urlPath;
+  }
+}
+
+class Util {
+  static Map<String, String> getParamsForUrl(String url) {
+    Map<String, String> params = new HashMap<>();
+
+    String[] urlBits = url.split("\\?", 2);
+
+    if (urlBits.length == 1) {
+      return params;
+    }
+
+    for (String bit : urlBits[1].split("&")) {
+      String[] bitBits = bit.split("=", 2);
+      if (bitBits.length == 1) {
+        continue;
+      }
+
+      params.put(bitBits[0], bitBits[1]);
+    }
+
+    return params;
+  }
+
+  public static String getUrlPathFromUrl(String url) {
+    return url.split("\\?", 2)[0];
   }
 }
