@@ -51,7 +51,6 @@ public class App {
       } else {
         System.out.printf("입력된 명령어 : %s\n", cmd);
       }
-
     }
     System.out.println("== 프로그램 종료 ==");
 
