@@ -1,23 +1,27 @@
 package com.sbs.exam.board;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
 
 public class Main {
   static int articleLastId = 0;
   static List<Article> articles = new ArrayList<>();
 
   static void makeTestData(List<Article> articles) {
-    for(int i = 0; i < 100; i++) {
+    for (int i = 0; i < 100; i++) {
       int id = i + 1;
       articles.add(new Article(id, "제목" + id, "내용" + id));
     }
   }
+
   public static void main(String[] args) {
     Scanner sc = new Scanner(System.in);
 
     makeTestData(articles);
 
-    if(articles.size() > 0) {
+    if (articles.size() > 0) {
       articleLastId = articles.get(articles.size() - 1).id;
     }
 
@@ -33,23 +37,17 @@ public class Main {
 
       if (rq.getUrlPath().equals("exit")) {
         break;
-      }
-      else if (rq.getUrlPath().equals("/usr/article/list")) {
+      } else if (rq.getUrlPath().equals("/usr/article/list")) {
         actionUsrArticleList(rq);
-      }
-      else if (rq.getUrlPath().equals("/usr/article/write")) {
+      } else if (rq.getUrlPath().equals("/usr/article/write")) {
         actionUsrArticleWrite(sc);
-      }
-      else if(rq.getUrlPath().equals("/usr/article/detail")) {
+      } else if (rq.getUrlPath().equals("/usr/article/detail")) {
         actionUsrArticleDetail(rq);
-      }
-      else if(rq.getUrlPath().equals("/usr/article/modify")) {
+      } else if (rq.getUrlPath().equals("/usr/article/modify")) {
         actionUsrArticleModify(sc, rq);
-      }
-      else if(rq.getUrlPath().equals("/usr/article/delete")) {
+      } else if (rq.getUrlPath().equals("/usr/article/delete")) {
         actionUsrArticleDelete(rq);
-      }
-      else {
+      } else {
         System.out.printf("입력된 명령어 : %s\n", cmd);
       }
 
@@ -62,7 +60,7 @@ public class Main {
   private static void actionUsrArticleDelete(Rq rq) {
     Map<String, String> params = rq.getParams();
 
-    if(params.containsKey("id") == false) {
+    if (params.containsKey("id") == false) {
       System.out.println("id를 입력해주세요.");
       return;
     }
@@ -71,13 +69,12 @@ public class Main {
 
     try {
       id = Integer.parseInt(params.get("id"));
-    }
-    catch (NumberFormatException e) {
+    } catch (NumberFormatException e) {
       System.out.println("id를 정수 형태로 입력해주세요.");
       return;
     }
 
-    if(articles.isEmpty() || id > articles.size()) {
+    if (articles.isEmpty() || id > articles.size()) {
       System.out.println("게시물이 존재하지 않습니다.");
       return;
     }
@@ -85,8 +82,8 @@ public class Main {
     Article foundArticle = null;
     boolean check = false;
 
-    for(Article article : articles) {
-      if(article.id == id) {
+    for (Article article : articles) {
+      if (article.id == id) {
         foundArticle = article;
         check = true;
         break;
@@ -104,7 +101,7 @@ public class Main {
   private static void actionUsrArticleModify(Scanner sc, Rq rq) {
     Map<String, String> params = rq.getParams();
 
-    if(params.containsKey("id") == false) {
+    if (params.containsKey("id") == false) {
       System.out.println("id를 입력해주세요.");
       return;
     }
@@ -113,13 +110,12 @@ public class Main {
 
     try {
       id = Integer.parseInt(params.get("id"));
-    }
-    catch (NumberFormatException e) {
+    } catch (NumberFormatException e) {
       System.out.println("id를 정수 형태로 입력해주세요.");
       return;
     }
 
-    if(articles.isEmpty() || id > articles.size()) {
+    if (articles.isEmpty() || id > articles.size()) {
       System.out.println("게시물이 존재하지 않습니다.");
       return;
     }
@@ -137,7 +133,7 @@ public class Main {
   private static void actionUsrArticleDetail(Rq rq) {
     Map<String, String> params = rq.getParams();
 
-    if(params.containsKey("id") == false) {
+    if (params.containsKey("id") == false) {
       System.out.println("id를 입력해주세요.");
       return;
     }
@@ -146,25 +142,23 @@ public class Main {
 
     try {
       id = Integer.parseInt(params.get("id"));
-    }
-    catch (NumberFormatException e) {
+    } catch (NumberFormatException e) {
       System.out.println("id를 정수 형태로 입력해주세요.");
       return;
     }
 
-    if(id > articles.size()) {
+    if (id > articles.size()) {
       System.out.println("게시물이 존재하지 않습니다.");
       return;
     }
 
     Article foundArticle = null;
 
-    for(Article article : articles) {
-      if(article.id == id) {
+    for (Article article : articles) {
+      if (article.id == id) {
         foundArticle = article;
         break;
-      }
-      else if(article.id != id) {
+      } else if (article.id != id) {
         System.out.println("해당 게시물은 존재하지 않습니다.");
         return;
       }
@@ -202,15 +196,15 @@ public class Main {
     // 검색시작
     List<Article> filteredArticles = articles;
 
-    if(params.containsKey("searchKeyword")) {
+    if (params.containsKey("searchKeyword")) {
       String searchKeyword = params.get("searchKeyword");
 
       filteredArticles = new ArrayList<>();
 
-      for(Article article : articles) {
+      for (Article article : articles) {
         boolean matched = article.title.contains(searchKeyword) || article.body.contains(searchKeyword);
 
-        if(matched) {
+        if (matched) {
           filteredArticles.add(article);
         }
       }
@@ -220,91 +214,16 @@ public class Main {
     List<Article> sortedArticles = filteredArticles;
 
     boolean orderByIdDesc = true;
-    if(params.containsKey("orderBy") && params.get("orderBy").equals("idAsc")) {
+    if (params.containsKey("orderBy") && params.get("orderBy").equals("idAsc")) {
       orderByIdDesc = false;
     }
 
-    if(orderByIdDesc) {
+    if (orderByIdDesc) {
       sortedArticles = Util.reverseList(sortedArticles);
     }
 
-    for(Article article : sortedArticles) {
+    for (Article article : sortedArticles) {
       System.out.printf("%d / %s\n", article.id, article.title);
     }
-  }
-}
-
-class Article {
-  int id;
-  String title;
-  String body;
-
-  Article(int id, String title, String body) {
-    this.id = id;
-    this.title = title;
-    this.body = body;
-  }
-
-  @Override
-  public String toString() {
-    return String.format("{id : %d, title : \"%s\", body : \"%s\"}", id, title, body);
-  }
-}
-
-
-class Rq {
-  private String url;
-  private Map<String, String> params;
-  private String urlPath;
-
-  Rq(String url) {
-    this.url = url;
-    params = Util.getParamsForUrl(this.url);
-    urlPath = Util.getUrlPathFromUrl(this.url);
-  }
-
-  public Map<String, String> getParams() {
-    return params;
-  }
-
-  public String getUrlPath() {
-    return urlPath;
-  }
-}
-
-class Util {
-  static Map<String, String> getParamsForUrl(String url) {
-    Map<String, String> params = new HashMap<>();
-
-    String[] urlBits = url.split("\\?", 2);
-
-    if (urlBits.length == 1) {
-      return params;
-    }
-
-    for (String bit : urlBits[1].split("&")) {
-      String[] bitBits = bit.split("=", 2);
-      if (bitBits.length == 1) {
-        continue;
-      }
-
-      params.put(bitBits[0], bitBits[1]);
-    }
-
-    return params;
-  }
-
-  public static String getUrlPathFromUrl(String url) {
-    return url.split("\\?", 2)[0];
-  }
-
-  // 이 함수는 원본리스트를 훼손하지 않고, 새 리스트를 만듭니다. 즉 정렬이 반대인 복사본리스트를 만들어서 반환합니다.
-  public static<T> List<T> reverseList(List<T> list) {
-    List<T> reverse = new ArrayList<>(list.size());
-
-    for ( int i = list.size() - 1; i >= 0; i-- ) {
-      reverse.add(list.get(i));
-    }
-    return reverse;
   }
 }
