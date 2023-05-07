@@ -34,7 +34,9 @@ public class ArticleRepository {
     List<Article> filteredArticles = new ArrayList<>();
 
     if(searchKeyword.length() > 0) {
-      for (Article article : articles) {
+      for (int i = articles.size() - 1; i >= 0; i--) {
+        Article article = articles.get(i);
+
         boolean matched = article.getTitle().contains(searchKeyword) || article.getBody().contains(searchKeyword);
 
         if (matched) {
